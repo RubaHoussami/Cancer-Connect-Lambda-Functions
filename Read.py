@@ -7,32 +7,21 @@ table = dynamodb.Table(table_name)
 
 def lambda_handler (event, context):
     try:
-        input_data=json.loads(event['body']) # dictionary containing item to be written
         
-        response=table.set_item(input_data)
-        
-        if response['ResponseMetadata']['HTTPStatusCode'] == 200: # checking for success
-        
-            return {
-                "statusCode" : 200,
-                "headers" : {"Content-Type":"application/json"},
-                "body" : json.dumps({"message" : "Item successfully added to dynamodb!"}) 
+        # checking if item exists in database
+     
+        response = table.scan()
+        print(response)
+        return {
+                "statusCode" : 200, # OK - success
+                "headers" : {"Content-Type":"application/json"}, # set the HTTP header of the response - JSON data
+                "body" : json.dumps(response) # turn Python dictionary ito JSON string to be sent as response body
             }
             
-        else:
-     
-            return {
-                "statusCode" : 500,
-                "headers" : {"Content-Type":"application/json"},
-                "body" : json.dumps({"message" : "Failed to add item to dynamodb!"})
-                }
-      
-    # catch any other errors due to accessing data
-    
     except Exception as e:
-     
+        print(e)
         return {
-            "statusCode" : 500,
+            "statusCode" : 500, # internal server error - failure
             "headers" : {"Content-Type":"application/json"},
-            "body" : json.dumps({"message" : "Internal server error!"})
+            "body" : json.dumps({"message" : "Internal server error!"}) 
         }
