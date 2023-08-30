@@ -11,7 +11,7 @@ def lambda_handler (event, context):
         # checking if item exists in database
      
         response = table.scan()
-        print(response)
+        
         return {
                 "statusCode" : 200, # OK - success
                 "headers" : {"Content-Type":"application/json"}, # set the HTTP header of the response - JSON data
@@ -19,7 +19,7 @@ def lambda_handler (event, context):
             }
             
     except Exception as e:
-        print(e)
+        
         return {
             "statusCode" : 500, # internal server error - failure
             "headers" : {"Content-Type":"application/json"},
