@@ -2,9 +2,9 @@ import json
 import boto3
 import hashlib
 
-def hash(password):
+def hash(password1):
     hash_object = hashlib.sha256()
-    hash_object.update(password.encode())
+    hash_object.update(password1.encode())
     return hash_object.hexdigest()
 
 dynamodb = boto3.resource('dynamodb')
@@ -113,7 +113,7 @@ def lambda_handler (event, context):
                 "body" : json.dumps({"message" : "Please enter a valid email address!"}) 
             }
             
-        new_post{
+        new_post={
             'DOB' : body['DOB'],
             'email' : body['email'],
             'First_name' : body['First_name'],
