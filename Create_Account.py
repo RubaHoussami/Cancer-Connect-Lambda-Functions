@@ -2,9 +2,9 @@ import json
 import boto3
 import hashlib
 
-def hash(password1):
+def hash(password):
     hash_object = hashlib.sha256()
-    hash_object.update(password1.encode())
+    hash_object.update(password.encode())
     return hash_object.hexdigest()
 
 dynamodb = boto3.resource('dynamodb')
@@ -17,11 +17,9 @@ table = dynamodb.Table(table_name)
 def lambda_handler (event, context):
     print(event)
     body=json.loads(event['body'])
+    print(body)
     
     try:
-    
-        response = table.scan()
-        
         #checking for username requirements
         
         if body['username']=="":
@@ -31,12 +29,15 @@ def lambda_handler (event, context):
                 "headers" : {"Content-Type":"application/json"},
                 "body" : json.dumps({"message" : "Please enter a username!"}) 
             }
+            
+        response = table.scan()
+        print(response)
         
         usernames=[]
         for item in response['Items']:
             usernames.append(item['username'])
             
-        if event['username'] in usernames:
+        if body['username'] in usernames:
 
             return {
                 "statusCode" : 400,
@@ -112,17 +113,32 @@ def lambda_handler (event, context):
                 "headers" : {"Content-Type":"application/json"},
                 "body" : json.dumps({"message" : "Please enter a valid email address!"}) 
             }
-            
-        new_post={
-            'DOB' : body['DOB'],
+
+        new_post={ 
+            'Day':body['Day'],
+            'Month':body['Month'],
+            'Year':body['Year'],
             'email' : body['email'],
             'First_name' : body['First_name'],
             'Last_name' : body['Last_name'],
             'password' : hash(body['password']),
-            'Phone_Number' : body['Phone_Number']
+            'Phone_Number' : body['Phone_Number'],
+            'username' : body['username'],
+            'liked_posts' : [],
+            'avatar' : 0
         }
         
+        if body['Badge']=="1":
+            new_post["badges"] = ['1']
+        elif body['Badge']=="2":
+            new_post["badges"] = ['2']
+        elif body['Badge']=="3":
+            new_post["badges"] = ['3']
+        else:
+            new_post["badges"] = ['4']
+        
         response2=table.put_item(Item=new_post)
+        print(response2)
         
         if response2['ResponseMetadata']['HTTPStatusCode'] == 200: # checking for success
             return {
@@ -139,7 +155,7 @@ def lambda_handler (event, context):
                 }
             
     except Exception as e:
-        
+        print(e)
         return {
             "statusCode" : 500, # internal server error - failure
             "headers" : {"Content-Type":"application/json"},
