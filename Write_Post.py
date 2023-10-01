@@ -50,15 +50,6 @@ def lambda_handler (event, context):
                     UpdateExpression='SET badges = :val',
                     ExpressionAttributeValues={':val': response1['Items'][0]['badges']}
                 )
-                for post in posts['Items']:
-                    if posts['Items'][0]['username']==body['username']:
-                        posts['Items'][0]['badges'].append('5')
-                        table.update_item(
-                            Key={'ID': posts['Items'][0]['ID'],
-                                'timestamp' : posts['Items'][0]['timestamp']},
-                            UpdateExpression='SET badges = :val',
-                            ExpressionAttributeValues={':val': posts['Items'][0]['badges']}
-                        )
                         
             new_post={
                 'ID': uuid.uuid4().hex,
@@ -71,7 +62,7 @@ def lambda_handler (event, context):
                 'comment_count' : 0,
                 'liked_users' : [],
                 'avatar' : response1['Items'][0]['avatar'],
-                'badges' : response1['Items'][0]['badges']
+                'badges' : response1['Items'][0]['badges'][0]
             }
             
             print("Make table.put_item call")
@@ -82,7 +73,7 @@ def lambda_handler (event, context):
             if response['ResponseMetadata']['HTTPStatusCode'] == 200 and badge5:
             
                 return {
-                    "statusCode" : 200,
+                    "statusCode" : 201,
                     "headers" : {"Content-Type":"application/json"},
                     "body" : json.dumps({"message" : "Item successfully added to dynamodb and badge 5 earned!"}) 
                 }
@@ -95,12 +86,11 @@ def lambda_handler (event, context):
                     "body" : json.dumps({"message" : "Item successfully added to dynamodb!"}) 
                 }
                 
-            else:
-                return {
-                    "statusCode" : 500,
-                    "headers" : {"Content-Type":"application/json"},
-                    "body" : json.dumps({"message" : "Failed to add item to dynamodb!"})
-                    }
+            return {
+                "statusCode" : 500,
+                "headers" : {"Content-Type":"application/json"},
+                "body" : json.dumps({"message" : "Failed to add item to dynamodb!"})
+            }
         return {
             "statusCode" : 404,
             "headers" : {"Content-Type":"application/json"},
