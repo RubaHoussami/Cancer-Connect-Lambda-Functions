@@ -25,16 +25,6 @@ def lambda_handler (event, context):
          
         response = table.scan()
         
-        #print(response)
-        
-        #items = response['Items']
-        #print(type(items))
-        # sorted_items = sorted(items, key=lambda x: x['timestamp'])
-        #sorted_items = sorted(items, cmp=compareItems)
-        #print(sorted_items)
-        # items.sort(key=compareItems) 
-        # print(items)
-        
         print(response) 
         
         for i in range(1, len(response['Items'])): 
@@ -56,6 +46,7 @@ def lambda_handler (event, context):
             item['likes']=str(item['likes'])
         
         response['liked_posts']=response1['Items'][0]['liked_posts']
+        response['badges']=response1['Items'][0]['badges']
         response['likes']=likes
     
         print(response)
