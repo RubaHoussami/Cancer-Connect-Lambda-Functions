@@ -2,6 +2,7 @@ import json
 import boto3
 from boto3.dynamodb.conditions import Key
 
+
 dynamodb = boto3.resource('dynamodb')
 table_name = 'Authentication'
 table = dynamodb.Table(table_name)
@@ -10,8 +11,8 @@ table_name1 = 'Post'
 table1 = dynamodb.Table(table_name1)
 
 
-def lambda_handler(event, context):   
-    print(event) 
+def lambda_handler(event, context):
+    
     username = event['rawQueryString'][9:]
     
     try:
@@ -40,8 +41,6 @@ def lambda_handler(event, context):
                 del item['comments_dictionary']
                 del item['avatar']
             
-            print(info)
-            
             return {
                     "statusCode" : 200,
                     "headers" : {"Content-Type" : "application/json"},
@@ -55,7 +54,6 @@ def lambda_handler(event, context):
         }
             
     except Exception as e:
-        print(e)
         return {
             "statusCode" : 500, # internal server error - failure
             "headers" : {"Content-Type":"application/json"},

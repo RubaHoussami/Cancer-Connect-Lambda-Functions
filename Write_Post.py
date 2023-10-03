@@ -13,23 +13,20 @@ dynamodb = boto3.resource('dynamodb')
 table_name = 'Post'
 table = dynamodb.Table(table_name)
 
-
 table_name1 = 'Authentication' 
 table1 = dynamodb.Table(table_name1)
 
+
 def lambda_handler (event, context):
     
-    # takes as input username, body, title
-    print(event) 
+    body = json.loads(event['body'])
     
-    body = json.loads(event['body'])  
     try:
         current_time = str(datetime.now().isoformat())
         current=current_time[0:4]+current_time[5:7]+current_time[8:10]+current_time[11:13]+current_time[14:16]+current_time[17:19]
         
         response1=table1.query(KeyConditionExpression=Key('username').eq(body['username']))
         
-        print(response1) 
         if remove(body['title'])!="" and remove(body['body'])!="":
             
             posts=table.scan()
@@ -50,15 +47,6 @@ def lambda_handler (event, context):
                     UpdateExpression='SET badges = :val',
                     ExpressionAttributeValues={':val': response1['Items'][0]['badges']}
                 )
-                for post in posts['Items']:
-                    if posts['Items'][0]['username']==body['username']:
-                        posts['Items'][0]['badges'].append('5')
-                        table.update_item(
-                            Key={'ID': posts['Items'][0]['ID'],
-                                'timestamp' : posts['Items'][0]['timestamp']},
-                            UpdateExpression='SET badges = :val',
-                            ExpressionAttributeValues={':val': posts['Items'][0]['badges']}
-                        )
                         
             new_post={
                 'ID': uuid.uuid4().hex,
@@ -71,18 +59,15 @@ def lambda_handler (event, context):
                 'comment_count' : 0,
                 'liked_users' : [],
                 'avatar' : response1['Items'][0]['avatar'],
-                'badges' : response1['Items'][0]['badges']
+                'badges' : response1['Items'][0]['badges'][0]
             }
             
-            print("Make table.put_item call")
             response=table.put_item(Item=new_post)
-            
-            print(response)
             
             if response['ResponseMetadata']['HTTPStatusCode'] == 200 and badge5:
             
                 return {
-                    "statusCode" : 200,
+                    "statusCode" : 201,
                     "headers" : {"Content-Type":"application/json"},
                     "body" : json.dumps({"message" : "Item successfully added to dynamodb and badge 5 earned!"}) 
                 }
@@ -95,19 +80,16 @@ def lambda_handler (event, context):
                     "body" : json.dumps({"message" : "Item successfully added to dynamodb!"}) 
                 }
                 
-            else:
-                return {
-                    "statusCode" : 500,
-                    "headers" : {"Content-Type":"application/json"},
-                    "body" : json.dumps({"message" : "Failed to add item to dynamodb!"})
-                    }
+            return {
+                "statusCode" : 500,
+                "headers" : {"Content-Type":"application/json"},
+                "body" : json.dumps({"message" : "Failed to add item to dynamodb!"})
+            }
         return {
             "statusCode" : 404,
             "headers" : {"Content-Type":"application/json"},
             "body" : json.dumps({"message" : "Empty message!"})
         }
-      
-    # catch any other errors due to accessing data
     
     except Exception as e:
         print(e)
