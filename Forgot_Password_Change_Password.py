@@ -3,10 +3,12 @@ import boto3
 import hashlib
 from boto3.dynamodb.conditions import Key
 
+
 def hash(password):
     hash_object = hashlib.sha256()
     hash_object.update(password.encode())
     return hash_object.hexdigest()
+
 
 dynamodb = boto3.resource('dynamodb')
 table_name = 'Authentication'
@@ -15,6 +17,7 @@ table = dynamodb.Table(table_name)
 def lambda_handler(event, context):
     
     body = json.loads(event['body'])
+    
     try:
         
         response = table.query(KeyConditionExpression=Key('username').eq(body['username']))
@@ -52,7 +55,6 @@ def lambda_handler(event, context):
             }
         
     except Exception as e:
-        print(e)
         return {
             "statusCode" : 500,
             "headers" : {"Content-Type":"application/json"},

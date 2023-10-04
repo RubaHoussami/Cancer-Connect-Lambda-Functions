@@ -27,6 +27,14 @@ def lambda_handler(event, context):
             for item in response1['Items']:
                 if item['username']==username:
                     Posts.append(item)
+                    
+            for i in range(1, len(Posts)): 
+                key = Posts[i]
+                j = i-1
+                while j >= 0 and int(key['timestamp']) >= int(Posts[j]['timestamp']):  
+                    Posts[j+1] = Posts[j]
+                    j -= 1
+                Posts[j+1] = key
             
             info=response['Items'][0]
             del info['password'] 

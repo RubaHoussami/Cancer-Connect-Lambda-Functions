@@ -1,31 +1,29 @@
 import json
 import boto3
 
+
 dynamodb = boto3.resource('dynamodb')
 table_name = 'Authentication'
 table = dynamodb.Table(table_name)
 
-'''
+
 def send_email(subject, body, recipient):
-    try:
-        response = ses.send_email(
-            Source='cancercnnct@gmail.com',
-            Destination={
-                'ToAddresses': [recipient]
+    response = ses.send_email(
+        Source='cancercnnct@gmail.com',
+        Destination={
+            'ToAddresses': [recipient]
+        },
+        Message={
+            'Subject': {
+                'Data': subject
             },
-            Message={
-                'Subject': {
-                    'Data': subject
-                },
-                'Body': {
-                    'Text': {
-                        'Data': body
-                    }
+            'Body': {
+                'Text': {
+                    'Data': body
                 }
             }
-        )
-    except ClientError as e:
-        
+        }
+    )
         
         
 def lambda_handler(event, context):
@@ -43,6 +41,7 @@ def lambda_handler(event, context):
                     "headers" : {"Content-Type":"application/json"},
                     "body" : json.dumps({"message" : "Email successfully sent!"})
                 }
+                
             elif body['username']==item['username'] and body['email']!=item['email']:
                 return {
                     "statusCode" : 400,
@@ -57,11 +56,8 @@ def lambda_handler(event, context):
         }
         
     except Exception as e:
-        print(e)
         return {
             "statusCode" : 500,
             "headers" : {"Content-Type":"application/json"},
             "body" : json.dumps({"message" : "Internal server error!"})
         }
-    
-'''

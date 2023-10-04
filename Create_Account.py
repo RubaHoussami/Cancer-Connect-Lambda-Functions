@@ -7,20 +7,17 @@ def hash(password):
     hash_object.update(password.encode())
     return hash_object.hexdigest()
 
+
 dynamodb = boto3.resource('dynamodb')
 table_name = 'Authentication'
 table = dynamodb.Table(table_name)
 
 
-#when creating the account, use to make sure the username is not found in database already and that password is valid
-
 def lambda_handler (event, context):
-    print(event)
+    
     body=json.loads(event['body'])
-    print(body)
     
     try:
-        #checking for username requirements
         
         if body['username']=="":
 
@@ -31,7 +28,6 @@ def lambda_handler (event, context):
             }
             
         response = table.scan()
-        print(response)
         
         usernames=[]
         for item in response['Items']:
@@ -52,8 +48,7 @@ def lambda_handler (event, context):
                 "headers" : {"Content-Type":"application/json"},
                 "body" : json.dumps({"message" : "Password needs to be at least 7 characters!"}) 
             }
-        
-        # checking for password requirements
+    
         if body['password']!=body['confirm_password']:
             
             return {
@@ -138,7 +133,6 @@ def lambda_handler (event, context):
             new_post["badges"] = ['4']
         
         response2=table.put_item(Item=new_post)
-        print(response2)
         
         if response2['ResponseMetadata']['HTTPStatusCode'] == 200: # checking for success
             return {
@@ -155,7 +149,6 @@ def lambda_handler (event, context):
                 }
             
     except Exception as e:
-        print(e)
         return {
             "statusCode" : 500, # internal server error - failure
             "headers" : {"Content-Type":"application/json"},
